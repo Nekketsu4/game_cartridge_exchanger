@@ -47,9 +47,10 @@ async def test_update_user_uncorrect_request(async_client_test: AsyncClient,
                                              update_data,
                                              expected_status_code,
                                              expected_detail):
-
     user = await get_users()
     updated_user = await async_client_test.patch(f"/user/{user[0].user_id}", json=update_data)
 
     assert updated_user.status_code == expected_status_code
     assert updated_user.json()['detail'] == expected_detail['detail']
+
+#Проверка веток

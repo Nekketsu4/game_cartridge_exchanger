@@ -1,0 +1,30 @@
+
+services:
+  db:
+    container_name: "database"
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    ports:
+      - "5432:5432"
+
+  test_db:
+    container_name: "test_database"
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=test_postgres
+      - POSTGRES_PASSWORD=test_postgres
+      - POSTGRES_DB=test_postgres
+    ports:
+      - "5433:5432"
+#    networks:
+#      -
+#
+#networks:
+#  my_net:
+#    driver: bridge
+

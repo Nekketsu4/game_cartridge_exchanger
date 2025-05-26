@@ -1,0 +1,23 @@
+# Файлы, специфичные для Python:
+*.py[cod]
+__pycache__/
+*.so
+# Файлы, связанные с упаковкой:
+build/
+dist/
+*.egg-info/
+# Файлы виртуальной среды:
+/venv
+.env
+
+# Файлы журналов и кэша:
+*.log
+logs/
+*.sqlite3
+db.sqlite3
+# Файлы, специфичные для редактора:
+.idea/
+.vscode/
+*.swp
+
+/migration

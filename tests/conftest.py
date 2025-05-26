@@ -1,19 +1,16 @@
-import pytest
 from typing import AsyncGenerator
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
-from sqlalchemy.pool import NullPool
-from sqlalchemy import select
+
+import pytest
+from httpx import ASGITransport, AsyncClient
 from pydantic import EmailStr
-
-
-
-
-from httpx import AsyncClient, ASGITransport
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.pool import NullPool
 
 import config
-from main import app
-from database.session import get_async_session
 from database.models import Base, User
+from database.session import get_async_session
+from main import app
 
 engine_test = create_async_engine(config.TEST_DATABASE_URL, poolclass=NullPool)
 async_session_test = async_sessionmaker(
@@ -45,6 +42,7 @@ async def async_client_test() -> AsyncGenerator[AsyncClient, None]:
     ) as ac:
         yield ac
 
+
 async def create_user_database(name: str, surname: str, email: EmailStr):
     async with async_session_test() as session:
         user = User(name=name, surname=surname, email=email)
@@ -52,11 +50,13 @@ async def create_user_database(name: str, surname: str, email: EmailStr):
         await session.commit()
         return user
 
+
 async def get_users():
     async with async_session_test() as session:
         result = await session.execute(select(User))
         users = result.scalars().all()
         return users
+
 
 async def get_users_by_id(user_id):
     async with async_session_test() as session:
@@ -74,7 +74,9 @@ async def get_users_by_id(user_id):
 #     async def wrapper(async_client_test, *args, **kwargs):
 #         async with async_session_test() as session:
 #             try:
-#                 return await method(async_client_test, *args, session=session, **kwargs)
+#                 return await method(
+#                 async_client_test, *args, session=session, **kwargs
+#                 )
 #             except Exception as e:
 #                 await session.rollback()
 #                 raise e
@@ -82,5 +84,3 @@ async def get_users_by_id(user_id):
 #                 await session.close()
 #
 #     return wrapper
-
-

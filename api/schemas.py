@@ -1,8 +1,8 @@
 import re
 import uuid
-from typing import Optional
-from pydantic import BaseModel, EmailStr, field_validator, ConfigDict, constr
+
 from fastapi.exceptions import HTTPException
+from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
 
 # SCHEMAS
 
@@ -22,7 +22,9 @@ class GetUser(TuneModel):
 
 
 class UpdateUser(BaseModel):
-    name: str | None = None     #ключевой момент записи type | None = None чтобы заработал функционал частичного апдейта данных
+    # ключевой момент записи type | None = None
+    # чтобы заработал функционал частичного апдейта данных
+    name: str | None = None
     surname: str | None = None
     email: EmailStr | None = None
 
@@ -36,19 +38,16 @@ class CreateUser(BaseModel):
     surname: str
     email: EmailStr
 
-
     @field_validator("name")
     def validate_name(cls, value):
         if not LETTER_MATCH.match(value):
-            raise HTTPException(
-                status_code=422, detail='Имя должно содержать буквы'
-            )
+            raise HTTPException(status_code=422, detail="Имя должно содержать буквы")
         return value
 
     @field_validator("surname")
     def validate_surname(cls, value):
         if not LETTER_MATCH.match(value):
             raise HTTPException(
-                status_code=422, detail='Фамилия должна содержать буквы'
+                status_code=422, detail="Фамилия должна содержать буквы"
             )
         return value

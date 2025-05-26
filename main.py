@@ -1,7 +1,7 @@
-from fastapi import FastAPI
-from routes.routes import main_router
 import uvicorn
+from fastapi import FastAPI
 
+from routes.routes import main_router
 
 # MAIN
 

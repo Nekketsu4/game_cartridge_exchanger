@@ -1,7 +1,6 @@
-from fastapi import Depends
 from fastapi.routing import APIRouter
-from api.handlers import user_router
 
+from api.handlers import user_router
 
 main_router = APIRouter()
 

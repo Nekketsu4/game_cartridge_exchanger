@@ -3,9 +3,15 @@ import uuid
 import pytest
 from httpx import AsyncClient
 
+from security.hashing import get_password_hash
 from tests.conftest import create_user_database, get_users, get_users_by_id
 
-rdy_dict = {"name": "Kadyr", "surname": "Aziev", "email": "some@mail.ru"}
+rdy_dict = {
+    "name": "Kadyr",
+    "surname": "Aziev",
+    "email": "some@mail.ru",
+    "password": get_password_hash("password"),
+}
 
 
 @pytest.mark.asyncio
@@ -34,4 +40,4 @@ async def test_get_user_by_id_not_found(async_client_test: AsyncClient):
     response = await async_client_test.get(f"/user/{uncorrect_id}")
 
     assert response.status_code == 404
-    assert response.json() == {"detail": "User was not found"}
+    assert response.json() == {"detail": "User by ID was not found"}

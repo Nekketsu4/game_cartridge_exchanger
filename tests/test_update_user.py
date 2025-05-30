@@ -1,12 +1,18 @@
 import pytest
 from httpx import AsyncClient
 
+from security.hashing import get_password_hash
 from tests.conftest import create_user_database, get_users
 
 
 @pytest.mark.asyncio
 async def test_update_user(async_client_test: AsyncClient):
-    data_user = {"name": "Kadyr", "surname": "Aziev", "email": "some@mail.ru"}
+    data_user = {
+        "name": "Kadyr",
+        "surname": "Aziev",
+        "email": "some@mail.ru",
+        "password": get_password_hash("password"),
+    }
 
     data_to_update = {"name": "Salmara", "surname": "Terso", "email": "livio@gmail.com"}
 

@@ -1,9 +1,15 @@
 import pytest
 from httpx import AsyncClient
 
+from security.hashing import get_password_hash
 from tests.conftest import create_user_database, get_users
 
-rdy_dict = {"name": "Kadyr", "surname": "Aziev", "email": "some@mail.ru"}
+rdy_dict = {
+    "name": "Kadyr",
+    "surname": "Aziev",
+    "email": "some@mail.ru",
+    "password": get_password_hash("password"),
+}
 
 
 @pytest.mark.asyncio

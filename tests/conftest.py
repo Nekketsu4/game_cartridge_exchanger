@@ -43,9 +43,9 @@ async def async_client_test() -> AsyncGenerator[AsyncClient, None]:
         yield ac
 
 
-async def create_user_database(name: str, surname: str, email: EmailStr):
+async def create_user_database(name: str, surname: str, email: EmailStr, password: str):
     async with async_session_test() as session:
-        user = User(name=name, surname=surname, email=email)
+        user = User(name=name, surname=surname, email=email, hashed_password=password)
         session.add(user)
         await session.commit()
         return user

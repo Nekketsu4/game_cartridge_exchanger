@@ -11,13 +11,19 @@ from api.crud import UserView
 from api.schemas import CreateUser, GetUser, UpdateUser
 from database.models import User
 from database.session import get_async_session
+from security.hashing import get_password_hash
+
+user_router = APIRouter()
 
 
 async def _create_new_user(body: CreateUser, session: AsyncSession) -> GetUser:
     async with session.begin():
         user_view = UserView(session)
         user = await user_view.create_user(
-            name=body.name, surname=body.surname, email=body.email
+            name=body.name,
+            surname=body.surname,
+            email=body.email,
+            hashed_password=get_password_hash(body.password),
         )
         # return GetUser(
         #     user_id=user.user_id,
@@ -64,9 +70,6 @@ async def _delete_user(user_id: UUID, session: AsyncSession):
         user_view = UserView(session)
         deleted_id = await user_view.delete_user(user_id=user_id)
         return {"response": f"User with ID:{deleted_id} has been deleted"}
-
-
-user_router = APIRouter()
 
 
 @user_router.post("/", response_model=GetUser)

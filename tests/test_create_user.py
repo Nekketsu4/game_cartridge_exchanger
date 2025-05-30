@@ -1,11 +1,22 @@
 import pytest
 from httpx import AsyncClient
 
+from security.hashing import get_password_hash
 from tests.conftest import create_user_database, get_users_by_id
 
-rdy_dict = {"name": "Kadyr", "surname": "Aziev", "email": "some@mail.ru"}
+rdy_dict = {
+    "name": "Kadyr",
+    "surname": "Aziev",
+    "email": "some@mail.ru",
+    "password": get_password_hash("password"),
+}
 
-rdy_dict2 = {"name": "Kerim", "surname": "Kurpanov", "email": "kurp@mail.ru"}
+rdy_dict2 = {
+    "name": "Kerim",
+    "surname": "Kurpanov",
+    "email": "kurp@mail.ru",
+    "password": get_password_hash("password2"),
+}
 
 
 @pytest.mark.asyncio
@@ -31,6 +42,7 @@ async def test_get_person(async_client_test: AsyncClient):
     assert resp_data["surname"] == res.surname
     assert resp_data["email"] == res.email
     assert resp_data["is_active"] == res.is_active
+    assert rdy_dict["password"]
     # проверка на ошибку вызванная существующим пользователем
     response2 = await async_client_test.post("/user/", json=rdy_dict)
     assert response2.status_code == 500
@@ -64,11 +76,22 @@ async def test_get_person(async_client_test: AsyncClient):
                         "msg": "Field required",
                         "input": {},
                     },
+                    {
+                        "type": "missing",
+                        "loc": ["body", "password"],
+                        "msg": "Field required",
+                        "input": {},
+                    },
                 ]
             },
         ),
         (
-            {"name": 666, "surname": "Kelemski", "email": "example@mail.com"},
+            {
+                "name": 666,
+                "surname": "Kelemski",
+                "email": "example@mail.com",
+                "password": get_password_hash("pass"),
+            },
             422,
             {
                 "detail": [  # кейс когда имя не строковый тип
@@ -82,7 +105,12 @@ async def test_get_person(async_client_test: AsyncClient):
             },
         ),
         (
-            {"name": "Robert", "surname": 190, "email": "example@mail.com"},
+            {
+                "name": "Robert",
+                "surname": 190,
+                "email": "example@mail.com",
+                "password": get_password_hash("pass"),
+            },
             422,
             {
                 "detail": [  # кейс когда фамилия не строковый тип
@@ -96,7 +124,12 @@ async def test_get_person(async_client_test: AsyncClient):
             },
         ),
         (
-            {"name": "Robert", "surname": "Kelemski", "email": "example.com"},
+            {
+                "name": "Robert",
+                "surname": "Kelemski",
+                "email": "example.com",
+                "password": get_password_hash("pass"),
+            },
             422,
             {
                 "detail": [  # кейс когда на корректность названия почты
@@ -112,7 +145,12 @@ async def test_get_person(async_client_test: AsyncClient):
             },
         ),
         (
-            {"name": "Robert6", "surname": "Kelemski", "email": "example@mail.com"},
+            {
+                "name": "Robert6",
+                "surname": "Kelemski",
+                "email": "example@mail.com",
+                "password": get_password_hash("pass"),
+            },
             422,
             {
                 # кейс на проверку цифры в строке в поле name
@@ -120,7 +158,12 @@ async def test_get_person(async_client_test: AsyncClient):
             },
         ),
         (
-            {"name": "Robert", "surname": "Kelem3ki", "email": "example@mail.com"},
+            {
+                "name": "Robert",
+                "surname": "Kelem3ki",
+                "email": "example@mail.com",
+                "password": get_password_hash("pass"),
+            },
             422,
             {
                 # кейс на проверку цифры в строке в поле surname

@@ -21,6 +21,10 @@ class GetUser(TuneModel):
     is_active: bool
 
 
+class GetFullUser(GetUser):
+    hashed_password: str
+
+
 class UpdateUser(BaseModel):
     # ключевой момент записи type | None = None
     # чтобы заработал функционал частичного апдейта данных
@@ -37,6 +41,7 @@ class CreateUser(BaseModel):
     name: str
     surname: str
     email: EmailStr
+    password: str
 
     @field_validator("name")
     def validate_name(cls, value):
@@ -51,3 +56,8 @@ class CreateUser(BaseModel):
                 status_code=422, detail="Фамилия должна содержать буквы"
             )
         return value
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str

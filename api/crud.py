@@ -1,6 +1,5 @@
 from typing import Union
 
-from fastapi import HTTPException
 from pydantic import EmailStr
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import UUID
@@ -32,15 +31,11 @@ class UserView:
 
     async def get_user_by_id(self, user_id: UUID):
         user = await self.session.get(User, user_id)
-        if not user:
-            raise HTTPException(status_code=404, detail="User by ID was not found")
         return user
 
     async def get_user_by_email(self, email: str):
         result = await self.session.execute(select(User).filter_by(email=email))
         user = result.scalar_one_or_none()
-        if not user:
-            raise HTTPException(status_code=404, detail="User email was not found")
         return user
 
     async def update_user(self, user_id: UUID, **kwargs):
@@ -54,6 +49,6 @@ class UserView:
         if user:
             await self.session.delete(user)
             await self.session.commit()
+            return user.user_id
         else:
-            raise HTTPException(status_code=404, detail="User was not found")
-        return user.user_id
+            return None

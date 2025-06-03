@@ -11,6 +11,7 @@ import config
 from database.models import Base, User
 from database.session import get_async_session
 from main import app
+from security.create_token import create_access_token
 
 engine_test = create_async_engine(config.TEST_DATABASE_URL, poolclass=NullPool)
 async_session_test = async_sessionmaker(
@@ -26,7 +27,7 @@ async def override_get_async_session() -> AsyncGenerator[AsyncSession, None]:
 app.dependency_overrides[get_async_session] = override_get_async_session
 
 
-@pytest.fixture(autouse=True, scope="module")
+@pytest.fixture(autouse=True, scope="function")
 async def prepare_database_test():
     async with engine_test.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
@@ -35,7 +36,7 @@ async def prepare_database_test():
         await conn.run_sync(Base.metadata.drop_all)
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 async def async_client_test() -> AsyncGenerator[AsyncClient, None]:
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url="http://test"
@@ -63,6 +64,11 @@ async def get_users_by_id(user_id):
         result = await session.execute(select(User).filter_by(user_id=user_id))
         user = result.scalar_one_or_none()
         return user
+
+
+def create_testing_token(email: str):
+    access_token = create_access_token(payload={"sub": email})
+    return {"Authorization": f"Bearer {access_token}"}
 
 
 # def connection(method):

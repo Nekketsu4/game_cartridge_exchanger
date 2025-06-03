@@ -8,6 +8,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.crud import UserView
+from api.login_handler import get_user_by_token
 from api.schemas import CreateUser, GetUser, UpdateUser
 from database.models import User
 from database.session import get_async_session
@@ -47,6 +48,8 @@ async def _get_user_by_id(user_id: UUID, session: AsyncSession) -> User:
     async with session.begin():
         user_view = UserView(session)
         user = await user_view.get_user_by_id(user_id=user_id)
+        if not user:
+            raise HTTPException(status_code=404, detail="User was not found")
         return GetUser.model_validate(user).model_dump()
 
 
@@ -69,7 +72,9 @@ async def _delete_user(user_id: UUID, session: AsyncSession):
     async with session.begin():
         user_view = UserView(session)
         deleted_id = await user_view.delete_user(user_id=user_id)
-        return {"response": f"User with ID:{deleted_id} has been deleted"}
+        if deleted_id:
+            return {"response": f"User with ID:{deleted_id} has been deleted"}
+        return None
 
 
 @user_router.post("/", response_model=GetUser)
@@ -83,13 +88,18 @@ async def create_user(
 
 
 @user_router.get("/", response_model=List[GetUser])
-async def get_users(session: AsyncSession = Depends(get_async_session)):
+async def get_users(
+    session: AsyncSession = Depends(get_async_session),
+    current_user=Depends(get_user_by_token),
+):
     return await _get_users(session)
 
 
 @user_router.get("/{user_id}", response_model=GetUser)
 async def get_user_by_id(
-    user_id: uuid.UUID, session: AsyncSession = Depends(get_async_session)
+    user_id: uuid.UUID,
+    session: AsyncSession = Depends(get_async_session),
+    current_user=Depends(get_user_by_token),
 ):
     return await _get_user_by_id(user_id, session)
 
@@ -99,6 +109,7 @@ async def update_user(
     body: UpdateUser,
     user_id: uuid.UUID,
     session: AsyncSession = Depends(get_async_session),
+    current_user=Depends(get_user_by_token),
 ):
     updated_data = body.model_dump(exclude_unset=True)
     if updated_data == {}:
@@ -109,6 +120,11 @@ async def update_user(
 
 @user_router.delete("/{user_id}")
 async def delete_user(
-    user_id: uuid.UUID, session: AsyncSession = Depends(get_async_session)
+    user_id: uuid.UUID,
+    session: AsyncSession = Depends(get_async_session),
+    current_user=Depends(get_user_by_token),
 ):
-    return await _delete_user(user_id, session)
+    user = await _delete_user(user_id, session)
+    if not user:
+        raise HTTPException(status_code=404, detail="User was not found")
+    return user

@@ -19,6 +19,7 @@ class GetUser(TuneModel):
     surname: str
     email: EmailStr
     is_active: bool
+    roles: list
 
 
 class GetFullUser(GetUser):

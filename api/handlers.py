@@ -9,10 +9,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.crud import UserView
 from api.login_handler import get_user_by_token
-from api.schemas import CreateUser, GetUser, UpdateUser
-from database.models import User
+from api.schemas import CreateUser, GetFullUser, GetUser, UpdateUser
 from database.session import get_async_session
 from security.hashing import get_password_hash
+from utils.permissions import RolesCredentions, user_permissions
 
 user_router = APIRouter()
 
@@ -25,6 +25,9 @@ async def _create_new_user(body: CreateUser, session: AsyncSession) -> GetUser:
             surname=body.surname,
             email=body.email,
             hashed_password=get_password_hash(body.password),
+            roles=[
+                RolesCredentions.ROLE_USER,
+            ],
         )
         # return GetUser(
         #     user_id=user.user_id,
@@ -34,7 +37,6 @@ async def _create_new_user(body: CreateUser, session: AsyncSession) -> GetUser:
         #     is_active=user.is_active
         # )
         return GetUser.model_validate(user).model_dump()
-        # аналогичен закоментированному коду выше
 
 
 async def _get_users(session: AsyncSession) -> List[GetUser]:
@@ -44,13 +46,13 @@ async def _get_users(session: AsyncSession) -> List[GetUser]:
         return [GetUser.model_validate(user).model_dump() for user in users]
 
 
-async def _get_user_by_id(user_id: UUID, session: AsyncSession) -> User:
+async def _get_user_by_id(user_id: UUID, session: AsyncSession) -> GetFullUser:
     async with session.begin():
         user_view = UserView(session)
         user = await user_view.get_user_by_id(user_id=user_id)
         if not user:
             raise HTTPException(status_code=404, detail="User was not found")
-        return GetUser.model_validate(user).model_dump()
+        return GetFullUser.model_validate(user).model_dump()
 
 
 async def _update_user(body, user_id: UUID, session: AsyncSession):
@@ -114,7 +116,16 @@ async def update_user(
     updated_data = body.model_dump(exclude_unset=True)
     if updated_data == {}:
         raise HTTPException(status_code=422, detail="Body is empty")
+    user_for_update = await _get_user_by_id(user_id, session)
+    if user_for_update is None:
+        raise HTTPException(status_code=404, detail="User was not found")
+    perm = await user_permissions(
+        target_user=user_for_update, current_user=current_user
+    )
+    if not perm:
+        raise HTTPException(status_code=403, detail="Forbidden")
     await _update_user(body, user_id, session)
+
     return {"response": f"success update for {body.name}"}
 
 
@@ -124,7 +135,12 @@ async def delete_user(
     session: AsyncSession = Depends(get_async_session),
     current_user=Depends(get_user_by_token),
 ):
-    user = await _delete_user(user_id, session)
-    if not user:
+    user_for_delete = await _get_user_by_id(user_id, session)
+    if user_for_delete is None:
         raise HTTPException(status_code=404, detail="User was not found")
+    if not await user_permissions(
+        target_user=user_for_delete, current_user=current_user
+    ):
+        raise HTTPException(status_code=403, detail="Forbidden")
+    user = await _delete_user(user_id, session)
     return user

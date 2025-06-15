@@ -3,12 +3,16 @@ from httpx import AsyncClient
 
 from security.hashing import get_password_hash
 from tests.conftest import create_testing_token, create_user_database, get_users
+from utils.permissions import RolesCredentions
 
 rdy_dict = {
     "name": "Kadyr",
     "surname": "Aziev",
     "email": "some@mail.ru",
     "password": get_password_hash("password"),
+    "roles": [
+        RolesCredentions.ROLE_USER,
+    ],
 }
 
 

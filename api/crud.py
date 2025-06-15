@@ -6,6 +6,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.models import User
+from utils.permissions import RolesCredentions
 
 # BUSINESS LOGIC
 
@@ -15,10 +16,19 @@ class UserView:
         self.session = session
 
     async def create_user(
-        self, name: str, surname: str, email: EmailStr, hashed_password: str
+        self,
+        name: str,
+        surname: str,
+        email: EmailStr,
+        hashed_password: str,
+        roles: list[RolesCredentions],
     ) -> User:
         new_user = User(
-            name=name, surname=surname, email=email, hashed_password=hashed_password
+            name=name,
+            surname=surname,
+            email=email,
+            hashed_password=hashed_password,
+            roles=roles,
         )
         self.session.add(new_user)
         await self.session.flush()

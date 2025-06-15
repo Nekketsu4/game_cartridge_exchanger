@@ -24,8 +24,8 @@ async def _get_user_auth_email(email: str, session: AsyncSession) -> GetFullUser
         user = await user_view.get_user_by_email(email=email)
         if not user:
             raise HTTPException(status_code=401, detail="User unauthorized")
-        dct = GetFullUser.model_validate(user).model_dump()
-        return GetFullUser(**dct)
+        # dct = GetFullUser.model_validate(user).model_dump()
+        return GetFullUser.model_validate(user).model_dump()
 
 
 async def authenticate_user(

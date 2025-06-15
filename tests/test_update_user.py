@@ -3,12 +3,16 @@ from httpx import AsyncClient
 
 from security.hashing import get_password_hash
 from tests.conftest import create_testing_token, create_user_database, get_users
+from utils.permissions import RolesCredentions
 
 data_user = {
     "name": "Kadyr",
     "surname": "Aziev",
     "email": "some@mail.ru",
     "password": get_password_hash("password"),
+    "roles": [
+        RolesCredentions.ROLE_USER,
+    ],
 }
 
 
@@ -59,7 +63,7 @@ async def test_update_user(async_client_test: AsyncClient):
         ),
     ],
 )
-async def test_update_user_uncorrect_request(
+async def test_update_user_incorrect_request(
     async_client_test: AsyncClient, update_data, expected_status_code, expected_detail
 ):
     user = await create_user_database(**data_user)

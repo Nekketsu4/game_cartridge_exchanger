@@ -9,6 +9,7 @@ rdy_dict = {
     "surname": "Aziev",
     "email": "some@mail.ru",
     "password": get_password_hash("password"),
+    "roles": list(),
 }
 
 rdy_dict2 = {
@@ -16,6 +17,7 @@ rdy_dict2 = {
     "surname": "Kurpanov",
     "email": "kurp@mail.ru",
     "password": get_password_hash("password2"),
+    "roles": list(),
 }
 
 
@@ -42,7 +44,7 @@ async def test_get_person(async_client_test: AsyncClient):
     assert resp_data["surname"] == res.surname
     assert resp_data["email"] == res.email
     assert resp_data["is_active"] == res.is_active
-    assert rdy_dict["password"]
+    assert resp_data["roles"] == ["ROLE_USER"]
     # проверка на ошибку вызванная существующим пользователем
     response2 = await async_client_test.post("/user/", json=rdy_dict)
     assert response2.status_code == 500

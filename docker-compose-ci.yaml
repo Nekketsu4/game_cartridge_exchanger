@@ -1,0 +1,40 @@
+
+services:
+  db:
+    container_name: "database"
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    ports:
+      - "5432:5432"
+
+  backend:
+    container_name: cartridge_exchange
+    image: cartridge_exchange
+    environment:
+      REAL_DATABASE_URL: "postgresql+asyncpg://postgres:postgres@0.0.0.0:5432/postgres"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    networks:
+      - custom
+    restart: always
+    depends_on:
+      - db
+
+networks:
+  custom:
+    driver: bridge
+    
+#    networks:
+#      -
+#
+#networks:
+#  my_net:
+#    driver: bridge
+

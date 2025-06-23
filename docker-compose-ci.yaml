@@ -30,7 +30,6 @@ services:
 networks:
   custom:
     driver: bridge
-    
 #    networks:
 #      -
 #

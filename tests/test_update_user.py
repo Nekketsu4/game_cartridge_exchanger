@@ -1,9 +1,9 @@
 import pytest
 from httpx import AsyncClient
 
+from database.models import RolesCredentions
 from security.hashing import get_password_hash
 from tests.conftest import create_testing_token, create_user_database, get_users
-from utils.permissions import RolesCredentions
 
 data_user = {
     "name": "Kadyr",

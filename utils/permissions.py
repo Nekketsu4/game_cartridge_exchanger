@@ -1,15 +1,14 @@
-from enum import Enum
+# from fastapi import HTTPException
 
 from api.schemas import GetUser
-
-
-class RolesCredentions(str, Enum):
-    ROLE_USER = "ROLE_USER"
-    ROLE_ADMIN = "ROLE_ADMIN"
-    ROLE_SUPER_ADMIN = "ROLE_SUPER_ADMIN"
+from database.models import RolesCredentions
 
 
 async def user_permissions(target_user: GetUser, current_user: GetUser) -> bool:
+    # if RolesCredentions.ROLE_SUPER_ADMIN in current_user.roles:
+    #     raise HTTPException(
+    #         status_code=403, detail="Forbidden"
+    #     )
     if target_user != current_user:
         if not {
             RolesCredentions.ROLE_ADMIN,

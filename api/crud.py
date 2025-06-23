@@ -5,8 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from database.models import User
-from utils.permissions import RolesCredentions
+from database.models import RolesCredentions, User
 
 # BUSINESS LOGIC
 

@@ -10,9 +10,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from api.crud import UserView
 from api.login_handler import get_user_by_token
 from api.schemas import CreateUser, GetFullUser, GetUser, UpdateUser
+from database.models import RolesCredentions
 from database.session import get_async_session
 from security.hashing import get_password_hash
-from utils.permissions import RolesCredentions, user_permissions
+from utils.permissions import user_permissions
 
 user_router = APIRouter()
 
@@ -144,3 +145,12 @@ async def delete_user(
         raise HTTPException(status_code=403, detail="Forbidden")
     user = await _delete_user(user_id, session)
     return user
+
+
+# @user_router.patch("/admin_privilege")
+# async def promote_to_admin_privilege(
+#         user_id: UUID,
+#         db: AsyncSession = Depends(get_async_session),
+#         current_user = Depends(get_user_by_token)
+# ):
+#     if not current_user.
